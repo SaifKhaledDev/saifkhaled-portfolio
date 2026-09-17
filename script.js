@@ -4,6 +4,12 @@ const THEME_KEY = "portfolio-theme";
 const MOBILE_BREAKPOINT = 768;
 
 /* =========================
+   NAVBAR ELEMENTS
+========================= */
+
+const navShell = document.getElementById("navShell");
+
+/* =========================
    DARK MODE
 ========================= */
 
@@ -30,6 +36,43 @@ function updateThemeIcons() {
   }
 }
 
+/* =========================
+   NAVBAR SCROLL EFFECT
+========================= */
+
+function updateNavbarOnScroll() {
+  if (!navShell) {
+    return;
+  }
+
+  const isScrolled = window.scrollY > 20;
+
+  /* Remove all possible background states first */
+  navShell.classList.remove(
+    "bg-black",
+    "bg-black/80",
+    "bg-white",
+    "bg-white/80",
+    "dark:bg-white",
+    "dark:bg-white/80",
+    "backdrop-blur-md",
+  );
+
+  if (isDarkMode()) {
+    if (isScrolled) {
+      navShell.classList.add("bg-white/80", "backdrop-blur-md");
+    } else {
+      navShell.classList.add("bg-white");
+    }
+  } else {
+    if (isScrolled) {
+      navShell.classList.add("bg-black/80", "backdrop-blur-md");
+    } else {
+      navShell.classList.add("bg-black");
+    }
+  }
+}
+
 function applyTheme(theme, save = true) {
   html.classList.toggle("dark", theme === "dark");
 
@@ -45,18 +88,19 @@ function initializeTheme() {
   const savedTheme = localStorage.getItem(THEME_KEY);
 
   if (savedTheme === "dark") {
-    applyTheme("dark", false);
-    return;
+    html.classList.add("dark");
+  } else if (savedTheme === "light") {
+    html.classList.remove("dark");
+  } else {
+    const systemDark = window.matchMedia(
+      "(prefers-color-scheme: dark)",
+    ).matches;
+
+    html.classList.toggle("dark", systemDark);
   }
 
-  if (savedTheme === "light") {
-    applyTheme("light", false);
-    return;
-  }
-
-  const systemDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-
-  applyTheme(systemDark ? "dark" : "light", false);
+  updateThemeIcons();
+  updateNavbarOnScroll();
 }
 
 initializeTheme();
@@ -187,11 +231,15 @@ function setActiveNav(sectionId) {
     const isActive = link.getAttribute("href") === `#${sectionId}`;
 
     if (isActive) {
-      link.classList.add("bg-white", "text-black", "shadow-sm");
-
-      link.classList.add("dark:bg-black", "dark:text-white");
-
       link.classList.remove("text-gray-400", "dark:text-gray-500");
+
+      link.classList.add(
+        "bg-white",
+        "text-black",
+        "shadow-sm",
+        "dark:bg-black",
+        "dark:text-white",
+      );
     } else {
       link.classList.remove(
         "bg-white",
@@ -239,42 +287,8 @@ window.addEventListener("load", updateActiveNav);
 updateActiveNav();
 
 /* =========================
-   NAVBAR SCROLL EFFECT
+   NAVBAR SCROLL LISTENER
 ========================= */
-
-const navShell = document.getElementById("navShell");
-
-function updateNavbarOnScroll() {
-  if (!navShell) {
-    return;
-  }
-
-  const isScrolled = window.scrollY > 20;
-
-  if (isScrolled) {
-    navShell.classList.add("backdrop-blur-md");
-
-    if (isDarkMode()) {
-      navShell.classList.remove("bg-white");
-
-      navShell.classList.add("bg-white/80");
-
-      navShell.classList.remove("dark:bg-white");
-    } else {
-      navShell.classList.remove("bg-black");
-
-      navShell.classList.add("bg-black/80");
-    }
-
-    return;
-  }
-
-  navShell.classList.remove("backdrop-blur-md", "bg-black/80", "bg-white/80");
-
-  navShell.classList.add("bg-black");
-
-  navShell.classList.add("dark:bg-white");
-}
 
 window.addEventListener("scroll", updateNavbarOnScroll, {
   passive: true,
@@ -353,6 +367,7 @@ contactForm?.addEventListener("submit", async (event) => {
   }
 
   /* Email validation */
+
   const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
   if (!emailPattern.test(email)) {
@@ -371,6 +386,7 @@ contactForm?.addEventListener("submit", async (event) => {
 
   submitButton.innerHTML = `
       <span>Sending...</span>
+
       <i
         class="fa-solid fa-spinner fa-spin text-xs"
         aria-hidden="true"
@@ -415,6 +431,7 @@ contactForm?.addEventListener("submit", async (event) => {
     }
   } finally {
     submitButton.disabled = false;
+
     submitButton.innerHTML = originalButtonContent;
   }
 });
