@@ -38,6 +38,7 @@ function applyTheme(theme, save = true) {
   }
 
   updateThemeIcons();
+  updateNavbarOnScroll();
 }
 
 function initializeTheme() {
@@ -177,6 +178,10 @@ const navItems = document.querySelectorAll("[data-nav-link]");
 
 const sections = Array.from(document.querySelectorAll("main[id], section[id]"));
 
+/* =========================
+   ACTIVE NAVBAR
+========================= */
+
 function setActiveNav(sectionId) {
   navItems.forEach((link) => {
     const isActive = link.getAttribute("href") === `#${sectionId}`;
@@ -232,6 +237,50 @@ window.addEventListener("resize", updateActiveNav);
 window.addEventListener("load", updateActiveNav);
 
 updateActiveNav();
+
+/* =========================
+   NAVBAR SCROLL EFFECT
+========================= */
+
+const navShell = document.getElementById("navShell");
+
+function updateNavbarOnScroll() {
+  if (!navShell) {
+    return;
+  }
+
+  const isScrolled = window.scrollY > 20;
+
+  if (isScrolled) {
+    navShell.classList.add("backdrop-blur-md");
+
+    if (isDarkMode()) {
+      navShell.classList.remove("bg-white");
+
+      navShell.classList.add("bg-white/80");
+
+      navShell.classList.remove("dark:bg-white");
+    } else {
+      navShell.classList.remove("bg-black");
+
+      navShell.classList.add("bg-black/80");
+    }
+
+    return;
+  }
+
+  navShell.classList.remove("backdrop-blur-md", "bg-black/80", "bg-white/80");
+
+  navShell.classList.add("bg-black");
+
+  navShell.classList.add("dark:bg-white");
+}
+
+window.addEventListener("scroll", updateNavbarOnScroll, {
+  passive: true,
+});
+
+updateNavbarOnScroll();
 
 /* =========================
    SMOOTH SCROLL
@@ -413,7 +462,7 @@ if (systemTheme.addEventListener) {
 }
 
 /* =========================
-   INITIAL MOBILE ICON
+   INITIAL ICONS
 ========================= */
 
 updateThemeIcons();
